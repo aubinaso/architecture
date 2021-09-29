@@ -1,0 +1,82 @@
+Vagrant.configure(2) do |config|
+
+	config.vm.box = "generic/debian9"
+	etcHosts = ""
+
+	ingressNginx = ""
+	wordpress = ""
+	wordpressUrl = "wordpress.aubin"
+
+	common = <<-SHELL
+	sudo apt update
+	sudo apt install -y -qq git vim tree net-tools telnet python3-pip sshpass nfs-common curl
+	curl -fsSL https://get.docker.com -o get-docker.sh
+	sudo sh get-docker.sh
+	sudo service docker start
+	sudo echo "autocmd filetype yaml setlocal ai ts=2 sw=2 et" > /root/.vimrc
+	sudo -i 's/ChallengeResponseAuthentication no/ChallengeResponseAUthentication yes/g' /etc/ssh/sshd_config
+	sudo systemctl restart sshd
+	SHELL
+	
+	case ARGV[0]
+		when "provision", "up"
+			print "Voulez-vous un ingress controller (y/n) ?\n"
+			ingressNginx = STDIN.gets.chomp
+			print "\n"
+		
+			if ingressNginx == "y"
+				print "Voulez-vous un wordpress dans kubernetes cluster (y/n) ?\n"
+				wordpress = STDIN.gets.chomp
+				print "\n"
+				
+				if wordpress == "y"
+					print "l'url du wordpress ?"
+					wordpressUrl = STDIN.gets.chomp
+					unless wordpressUrl.empty? then wordpressUrl else 'wordpress.aubin' end
+				end
+				
+			end
+		end
+	else
+
+	end
+
+
+
+	NODES = [
+		{ :hostname => "haproxy", :ip => "192.168.1.254", :cpus => 1, :mem => 10, :type => "proxy"},
+		{ :hostname => "node1", :ip => "192.168.1.1", :cpus => 1, :mem => 20, :type => "k8snode" },
+		{ :hostname => "node2", :ip => "192.168.1.2", :cpus => 1, :mem => 20, :type => "k8snode" },
+		{ :hostname => "master", :ip => "192.168.1.11", :cpus => 1, :mem => 10, :type => "k8smaster" },
+		{ :hostname => "deploy", :ip => "192.168.1.10", :cpus => 1, :mem => 10, :type => "deploy_ansible" },
+	]
+
+
+	#remplissage du fichier /etc/hosts des machines
+	NODES.each do |node|
+		etcHosts += "echo'" + node[:ip] + " " + node[:hostname] + "' >> /etc/hosts" + "\n"	
+	end
+
+
+	NODES.each do |node|
+		config.vm.define node[:hostname] do |cfg|
+			cfg.vm.hostname = node[:hostname]
+			cfg.vm.network "private_network, ip: node[:ip]
+			cfg.vm.provider "virtualbox" do |v|
+				v.customize [ "modifyvm", :id, "--cpus", node[:cpus] ]
+				v.customize [ "modifyvm", :id, "--natdnshostresolver1", "on" ]
+				v.customize [ "modifyvm", :id, "--natdnsproxy1", "on" ]
+				v.customize [ "modifyvm", :id, "--memory", node[:mem] ]
+				v.customize [ "modifyvm", :id, "--name", node[:hostname] ]
+			end
+			cfg.vm.provision :shell, :inline => etcHosts
+
+			if node[:type] == "deploy"
+				cfg.vm.provision :shell, :inline => common
+				cfg.vm.provision :shell
+		end
+	end
+				
+
+
+end
