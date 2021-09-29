@@ -1,0 +1,8 @@
+---
+# defaults file for master
+
+node_ip: 172.17.0.2
+
+node_name: master
+
+pod_network: 10.0.2.0/16

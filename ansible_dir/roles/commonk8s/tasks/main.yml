@@ -1,0 +1,64 @@
+---
+# tasks file for commonk8s
+- name: clean older docker version
+  apt:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ docker_remove }}"
+
+- name: Install packages that allow apt to be used over HTTPS
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items: "{{ https_packages }}"
+
+- name: Add new repositories keys
+  apt_key:
+    url: "{{ item.key }}"
+    state: present
+  with_items: "{{ gpg_keys | default([]) }}"
+
+- name: Add new apt repositories
+  apt_repository:
+    repo: "{{ item.repo }}"
+    state: present
+  with_items: "{{ repositories | default([]) }}"
+
+- name: Install docker
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ docker_packages }}"
+  notify: docker status
+
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  with_items:
+    - swap
+    - none
+
+- name: Disable swap
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Install Kubernetes binaries
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items: "{{ k8s_packages }}"
+
+- name: Configure node ip
+  lineinfile:
+    path: '/etc/systemd/system/kubelet.service.d/10-kubeadm.conf'
+    line: 'Environment="KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }}"'
+    regexp: 'KUBELET_EXTRA_ARGS='
+    insertafter: '\[Service\]'
+    state: present
+  notify: 
+    - docker restart
+    - restart kubelet

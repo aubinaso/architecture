@@ -1,0 +1,30 @@
+---
+# defaults file for commonk8s
+docker_remove:
+  - docker
+  - docker-engine
+  - docker.io
+  - containerd
+  - runc
+
+https_packages:
+  - apt-transport-https
+  - curl
+
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+
+gpg_keys:
+  - key: https://download.docker.com/linux/debian/gpg
+  - key: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+repositories:
+  - repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ansible_distribution_release}} stable" 
+  - repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main" 
+
+k8s_packages:
+  - kubeadm
+  - kubelet
+  - kubectl

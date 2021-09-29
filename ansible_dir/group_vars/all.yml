@@ -1,0 +1,12 @@
+ansible_user: root
+
+base_packages:
+  - zip
+  - unzip
+  - python3
+  - python3-pip
+  - git
+  - wget
+  - curl
+  - tree
+  - sshpass

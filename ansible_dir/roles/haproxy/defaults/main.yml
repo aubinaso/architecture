@@ -1,0 +1,22 @@
+---
+# defaults file for haproxy
+frontend_port:
+  - 80
+
+backend_port:
+  - 8080
+
+backend_name:
+  - myapp_backend
+
+frontend_name:
+  - myapp_frontend
+
+algorithm:
+  - roundrobin
+
+haproxy_user: aubin
+
+haproxy_group: aubin
+
+haproxy_user_password: aubin

@@ -1,0 +1,21 @@
+all:
+#  hosts:
+#    test_server:
+  children:
+    application:
+      children:
+        kubernetes:
+          children:
+            commonk8s:
+              hosts:
+                node1:
+                node2:
+            masterk8s:
+              hosts:
+                master:
+    backend:
+    frontend:
+      children:
+        proxy:
+          hosts:
+            haproxy:

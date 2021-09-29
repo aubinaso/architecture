@@ -1,0 +1,31 @@
+---
+# tasks file for haproxy
+
+- name: Install haproxy
+  apt:
+    name: haproxy
+    update_cache: yes
+    state: latest
+
+- name: Create Group haproxy
+  group:
+    name: "{{ haproxy_group }}"
+    state: present
+
+- name: Create User haproxy
+  user:
+    name: "{{ haproxy_user }}"
+    comment: user haproxy
+    groups: "{{ item }}"
+    shell: /bin/bash
+    append: yes
+    password: "{{ haproxy_user_password }}"
+  with_items:
+    - "{{ haproxy_group }}"
+    - sudoers
+
+- name: Ajout de la configuration
+  template:
+    src: haproxy.yml.j2
+    dest: /etc/haproxy/haproxy.cfg
+  notify: restart haproxy

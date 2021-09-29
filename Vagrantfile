@@ -20,7 +20,7 @@ Vagrant.configure(2) do |config|
 	NODES.each do |node|
 		config.vm.define node[:hostname] do |cfg|
 			cfg.vm.hostname = node[:hostname]
-			cfg.vm.network "private_network, ip: node[:ip]
+			cfg.vm.network "private_network", ip: node[:ip]
 			cfg.vm.provider "virtualbox" do |v|
 				v.customize [ "modifyvm", :id, "--cpus", node[:cpus] ]
 				v.customize [ "modifyvm", :id, "--natdnshostresolver1", "on" ]
@@ -31,8 +31,8 @@ Vagrant.configure(2) do |config|
 			cfg.vm.provision :shell, :inline => etcHosts
 
 			if node[:type] == "deploy"
-				cfg.vm.provision :shell, :path => ansible_install.sh
-				cfg.vm.provision :shell, :path => installation_packet_base.sh
+				cfg.vm.provision "shell", path: "ansible_install.sh"
+				cfg.vm.provision "shell", path: "installation_packet_base.sh"
 				cfg.vm.provision "file", source: "./ansible_dir", destination: "/ansible_dir"
 			end
 		end

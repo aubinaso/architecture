@@ -1,0 +1,22 @@
+---
+# tasks file for terraform
+
+- name: Install packages for terraform
+  apt:
+    name: {{ terraform_init }}
+    state: yes
+    update_cache: yes
+
+- name: add repository keys:
+  apt_key:
+    url: {{ terraform_key }}
+    state: present
+
+- name: add repository:
+  apt_repository:
+    repo: {{ repository }}
+    state: present
+
+- name: Install terraform
+  apt:
+    name: terraform

@@ -1,0 +1,24 @@
+- hosts: all
+  become: yes
+  roles:
+    - common
+
+- hosts: kubernetes
+  become: yes
+  roles:
+    - commonk8s
+
+- hosts: masterk8s
+  become: yes
+  roles:
+    - master
+
+- hosts: commonk8s
+  become: yes
+  roles:
+    - node
+
+- hosts: proxy
+  become: yes
+  roles:
+    - haproxy
