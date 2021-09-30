@@ -34,6 +34,7 @@ Vagrant.configure(2) do |config|
 				cfg.vm.provision "shell", path: "ansible_install.sh"
 				cfg.vm.provision "shell", path: "installation_packet_base.sh"
 				cfg.vm.provision "file", source: "./ansible_dir", destination: "/ansible_dir"
+				cfg.vm.provision "file", source: "./wordpress_terra_k8s", destination: "/wordpress_terra_k8s"
 			end
 		end
 	end
