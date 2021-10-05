@@ -1,0 +1,1 @@
+variable "mysql-pass" {}
