@@ -16,12 +16,6 @@ variable wordpress-target-port {}
 variable node-ip-port {}
 variable wordpress-port-name {}
 variable replicas {}
-# variable secret_name {}
-# variable volume_name {}
-# variable volume_claim_name {}
-# variable service_wordpress_name {}
-# variable deploy_mysql_name {}
-# variable deploy_wordpress_name {}
 
 resource "null_resource" "install_nfs-utils" {
 
